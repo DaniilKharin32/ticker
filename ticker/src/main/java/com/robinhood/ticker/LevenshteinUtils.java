@@ -33,19 +33,19 @@ public class LevenshteinUtils {
      * This is a wrapper function around {@link #appendColumnActionsForSegment} that
      * additionally takes in supportedCharacters. It uses supportedCharacters to compute whether
      * the current character should be animated or if it should remain in-place.
-     *
+     * <p>
      * For specific implementation details, see {@link #appendColumnActionsForSegment}.
      *
-     * @param source the source char array to animate from
-     * @param target the target char array to animate to
+     * @param source              the source char array to animate from
+     * @param target              the target char array to animate to
      * @param supportedCharacters all characters that support custom animation.
      * @return an int array of size min(source.length, target.length) where each index
-     *         corresponds to one of {@link #ACTION_SAME}, {@link #ACTION_INSERT},
-     *         {@link #ACTION_DELETE} to represent if we update, insert, or delete a character
-     *         at the particular index.
+     * corresponds to one of {@link #ACTION_SAME}, {@link #ACTION_INSERT},
+     * {@link #ACTION_DELETE} to represent if we update, insert, or delete a character
+     * at the particular index.
      */
-    public static int[] computeColumnActions(char[] source, char[] target,
-            Set<Character> supportedCharacters) {
+    public static int[] computeColumnActions(char[][] source, char[][] target,
+                                             Set<char[]> supportedCharacters) {
         int sourceIndex = 0;
         int targetIndex = 0;
 
@@ -109,8 +109,8 @@ public class LevenshteinUtils {
         return result;
     }
 
-    private static int findNextUnsupportedChar(char[] chars, int startIndex,
-            Set<Character> supportedCharacters) {
+    private static int findNextUnsupportedChar(char[][] chars, int startIndex,
+                                               Set<char[]> supportedCharacters) {
         for (int i = startIndex; i < chars.length; i++) {
             if (!supportedCharacters.contains(chars[i])) {
                 return i;
@@ -132,17 +132,17 @@ public class LevenshteinUtils {
      * are the same length (so optimize update over insertion/deletion).
      *
      * @param columnActions the target list to append actions into
-     * @param source the source character array
-     * @param target the target character array
-     * @param sourceStart the start index of source to compute column actions (inclusive)
-     * @param sourceEnd the end index of source to compute column actions (exclusive)
-     * @param targetStart the start index of target to compute column actions (inclusive)
-     * @param targetEnd the end index of target to compute column actions (exclusive)
+     * @param source        the source character array
+     * @param target        the target character array
+     * @param sourceStart   the start index of source to compute column actions (inclusive)
+     * @param sourceEnd     the end index of source to compute column actions (exclusive)
+     * @param targetStart   the start index of target to compute column actions (inclusive)
+     * @param targetEnd     the end index of target to compute column actions (exclusive)
      */
     private static void appendColumnActionsForSegment(
             List<Integer> columnActions,
-            char[] source,
-            char[] target,
+            char[][] source,
+            char[][] target,
             int sourceStart,
             int sourceEnd,
             int targetStart,
@@ -177,9 +177,9 @@ public class LevenshteinUtils {
                 cost = source[row - 1 + sourceStart] == target[col - 1 + targetStart] ? 0 : 1;
 
                 matrix[row][col] = min(
-                        matrix[row-1][col] + 1,
-                        matrix[row][col-1] + 1,
-                        matrix[row-1][col-1] + cost);
+                        matrix[row - 1][col] + 1,
+                        matrix[row][col - 1] + 1,
+                        matrix[row - 1][col - 1] + cost);
             }
         }
 
@@ -197,9 +197,9 @@ public class LevenshteinUtils {
                 resultList.add(ACTION_DELETE);
                 row--;
             } else {
-                final int insert = matrix[row][col-1];
-                final int delete = matrix[row-1][col];
-                final int replace = matrix[row-1][col-1];
+                final int insert = matrix[row][col - 1];
+                final int delete = matrix[row - 1][col];
+                final int replace = matrix[row - 1][col - 1];
 
                 if (insert < delete && insert < replace) {
                     resultList.add(ACTION_INSERT);
@@ -224,5 +224,26 @@ public class LevenshteinUtils {
 
     private static int min(int first, int second, int third) {
         return Math.min(first, Math.min(second, third));
+    }
+
+    public static char[][] toCharArrayOfArray(String rawString) {
+        return toCharArrayOfArray(rawString.toCharArray());
+    }
+
+    public static char[][] toCharArrayOfArray(char[] rawCharsArray) {
+        List<char[]> symbolList = new ArrayList<>();
+        char nextChar;
+        char[] symbol;
+        for (int i = 0; i < rawCharsArray.length; i++) {
+            nextChar = rawCharsArray[i];
+            if (Character.isHighSurrogate(nextChar)) {
+                symbol = new char[]{nextChar, rawCharsArray[i + 1]};
+                i++;
+            } else {
+                symbol = new char[]{nextChar};
+            }
+            symbolList.add(symbol);
+        }
+        return symbolList.toArray(new char[0][]);
     }
 }

@@ -9,7 +9,7 @@ import com.robinhood.ticker.TickerView;
 import java.util.Random;
 
 public class MainActivity extends BaseActivity {
-    private final String alphabetlist = "abcdefghijklmnopqrstuvwxyz";
+    private final String alphabetlist = "abcdefghijklmnopqrstuvwxyz\uD83D\uDD25";
 
     private TickerView ticker1, ticker2, ticker3;
 
@@ -52,10 +52,22 @@ public class MainActivity extends BaseActivity {
     }
 
     private String generateChars(Random random, String list, int numDigits) {
-        final char[] result = new char[numDigits];
+        StringBuilder sb = new StringBuilder();
+        char nextChar;
+        char[] symbol;
+        int pos;
         for (int i = 0; i < numDigits; i++) {
-            result[i] = list.charAt(random.nextInt(list.length()));
+            pos = random.nextInt(list.length());
+            nextChar = list.charAt(pos);
+            if (Character.isHighSurrogate(nextChar)) {
+                symbol = new char[]{nextChar, list.charAt(pos + 1)};
+            } else if (Character.isLowSurrogate(nextChar)) {
+                symbol = new char[]{list.charAt(pos - 1), nextChar};
+            } else {
+                symbol = new char[]{nextChar};
+            }
+            sb.append(symbol);
         }
-        return new String(result);
+        return sb.toString();
     }
 }
