@@ -30,13 +30,13 @@ class TickerColumn {
     private TickerCharacterList[] characterLists;
     private final TickerDrawMetrics metrics;
 
-    private char currentChar = TickerUtils.EMPTY_CHAR;
-    private char targetChar = TickerUtils.EMPTY_CHAR;
+    private char[] currentChar = TickerUtils.EMPTY_CHAR;
+    private char[] targetChar = TickerUtils.EMPTY_CHAR;
 
     // The indices characters simply signify what positions are for the current and target
     // characters in the assigned characterList. This tells us how to animate from the current
     // to the target characters.
-    private char[] currentCharacterList;
+    private char[][] currentCharacterList;
     private int startIndex;
     private int endIndex;
 
@@ -74,7 +74,7 @@ class TickerColumn {
      * change can either be animated or instant depending on the animation progress set by
      * {@link #setAnimationProgress(float)}.
      */
-    void setTargetChar(char targetChar) {
+    void setTargetChar(char[] targetChar) {
         // Set the current and target characters for the animation
         this.targetChar = targetChar;
         this.sourceWidth = this.currentWidth;
@@ -94,11 +94,11 @@ class TickerColumn {
         currentBottomDelta = 0f;
     }
 
-    char getCurrentChar() {
+    char[] getCurrentChar() {
         return currentChar;
     }
 
-    char getTargetChar() {
+    char[] getTargetChar() {
         return targetChar;
     }
 
@@ -133,10 +133,10 @@ class TickerColumn {
         // going straight from source to target
         if (currentCharacterList == null) {
             if (currentChar == targetChar) {
-                currentCharacterList = new char[] {currentChar};
+                currentCharacterList = new char[][] {currentChar};
                 startIndex = endIndex = 0;
             } else {
-                currentCharacterList = new char[] {currentChar, targetChar};
+                currentCharacterList = new char[][] {currentChar, targetChar};
                 startIndex = 0;
                 endIndex = 1;
             }
@@ -237,10 +237,11 @@ class TickerColumn {
     /**
      * @return whether the text was successfully drawn on the canvas
      */
-    private boolean drawText(Canvas canvas, Paint textPaint, char[] characterList,
+    private boolean drawText(Canvas canvas, Paint textPaint, char[][] characterPlainList,
             int index, float verticalOffset) {
-        if (index >= 0 && index < characterList.length) {
-            canvas.drawText(characterList, index, 1, 0f, verticalOffset, textPaint);
+        if (index >= 0 && index < characterPlainList.length) {
+            char[] chars = characterPlainList[index];
+            canvas.drawText(chars, 0, chars.length, 0f, verticalOffset, textPaint);
             return true;
         }
         return false;

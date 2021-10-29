@@ -9,13 +9,13 @@ import java.util.Set;
 import static org.junit.Assert.assertEquals;
 
 public class LevenshteinUtilsTest {
-    private Set<Character> numbers;
+    private Set<char[]> numbers;
 
     @Before
     public void setup() {
         numbers = new HashSet<>();
         for (char c : "1234567890".toCharArray()) {
-            numbers.add(c);
+            numbers.add(new char[]{c});
         }
     }
 
@@ -79,7 +79,7 @@ public class LevenshteinUtilsTest {
 
     private void runTest(String source, String target, String actions) {
         final int[] result = LevenshteinUtils.computeColumnActions(
-                source.toCharArray(), target.toCharArray(), numbers);
+                LevenshteinUtils.toCharArrayOfArray(source.toCharArray()), LevenshteinUtils.toCharArrayOfArray(target.toCharArray()), numbers);
         assertEquals(actions, convertArrToString(result));
     }
 

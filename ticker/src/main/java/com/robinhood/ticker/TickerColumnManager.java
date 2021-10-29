@@ -21,6 +21,7 @@ import android.graphics.Paint;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -38,7 +39,7 @@ class TickerColumnManager {
     private final TickerDrawMetrics metrics;
 
     private TickerCharacterList[] characterLists;
-    private Set<Character> supportedCharacters;
+    private Set<char[]> supportedCharacters;
 
     TickerColumnManager(TickerDrawMetrics metrics) {
         this.metrics = metrics;
@@ -71,11 +72,11 @@ class TickerColumnManager {
     /**
      * Tell the column manager the new target text that it should display.
      */
-    void setText(char[] text) {
+    void setText(char[] rawText) {
         if (characterLists == null) {
             throw new IllegalStateException("Need to call #setCharacterLists first.");
         }
-
+        char[][] text = LevenshteinUtils.toCharArrayOfArray(rawText);
         // First remove any zero-width columns
         for (int i = 0; i < tickerColumns.size(); ) {
             final TickerColumn tickerColumn = tickerColumns.get(i);
@@ -143,9 +144,9 @@ class TickerColumnManager {
         return width;
     }
 
-    char[] getCurrentText() {
+    char[][] getCurrentText() {
         final int size = tickerColumns.size();
-        final char[] currentText = new char[size];
+        final char[][] currentText = new char[size][];
         for (int i = 0; i < size; i++) {
             currentText[i] = tickerColumns.get(i).getCurrentChar();
         }
