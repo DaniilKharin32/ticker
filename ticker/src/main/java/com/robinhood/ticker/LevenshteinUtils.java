@@ -45,7 +45,7 @@ public class LevenshteinUtils {
      * at the particular index.
      */
     public static int[] computeColumnActions(char[][] source, char[][] target,
-                                             Set<char[]> supportedCharacters) {
+                                             Set<String> supportedCharacters) {
         int sourceIndex = 0;
         int targetIndex = 0;
 
@@ -64,8 +64,8 @@ public class LevenshteinUtils {
                 break;
             }
 
-            final boolean containsSourceChar = supportedCharacters.contains(source[sourceIndex]);
-            final boolean containsTargetChar = supportedCharacters.contains(target[targetIndex]);
+            final boolean containsSourceChar = supportedCharacters.contains(String.valueOf(source[sourceIndex]));
+            final boolean containsTargetChar = supportedCharacters.contains(String.valueOf(target[targetIndex]));
 
             if (containsSourceChar && containsTargetChar) {
                 // We reached a segment that we can perform animations on
@@ -110,9 +110,9 @@ public class LevenshteinUtils {
     }
 
     private static int findNextUnsupportedChar(char[][] chars, int startIndex,
-                                               Set<char[]> supportedCharacters) {
+                                               Set<String> supportedCharacters) {
         for (int i = startIndex; i < chars.length; i++) {
-            if (!supportedCharacters.contains(chars[i])) {
+            if (!supportedCharacters.contains(String.valueOf(chars[i]))) {
                 return i;
             }
         }
@@ -174,7 +174,7 @@ public class LevenshteinUtils {
         int cost;
         for (int row = 1; row < numRows; row++) {
             for (int col = 1; col < numCols; col++) {
-                cost = source[row - 1 + sourceStart] == target[col - 1 + targetStart] ? 0 : 1;
+                cost = equalsCharArrays(source[row - 1 + sourceStart], target[col - 1 + targetStart]) ? 0 : 1;
 
                 matrix[row][col] = min(
                         matrix[row - 1][col] + 1,
@@ -245,5 +245,25 @@ public class LevenshteinUtils {
             symbolList.add(symbol);
         }
         return symbolList.toArray(new char[0][]);
+    }
+
+    public static char[] toPlainCharArray(char[][] charListRaw){
+        StringBuilder sb = new StringBuilder();
+        for (char[] chars : charListRaw) {
+            sb.append(chars);
+        }
+        char[] charList = new char[sb.length()];
+        sb.getChars(0, sb.length(), charList, 0);
+        return charList;
+    }
+
+    public static boolean equalsCharArrays(char[] first, char[] second) {
+        if (first.length != second.length) return false;
+        for (int i = 0; i < first.length; i++) {
+            if (first[i] != second[i]) {
+                return false;
+            }
+        }
+        return true;
     }
 }

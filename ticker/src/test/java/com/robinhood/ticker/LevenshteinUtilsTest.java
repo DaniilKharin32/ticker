@@ -9,13 +9,13 @@ import java.util.Set;
 import static org.junit.Assert.assertEquals;
 
 public class LevenshteinUtilsTest {
-    private Set<char[]> numbers;
+    private Set<String> numbers;
 
     @Before
     public void setup() {
         numbers = new HashSet<>();
         for (char c : "1234567890".toCharArray()) {
-            numbers.add(new char[]{c});
+            numbers.add(String.valueOf(c));
         }
     }
 

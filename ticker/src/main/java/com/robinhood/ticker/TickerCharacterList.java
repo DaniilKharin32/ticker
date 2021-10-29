@@ -16,9 +16,7 @@
 
 package com.robinhood.ticker;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -38,7 +36,7 @@ class TickerCharacterList {
     // The saved character list will always be of the format: EMPTY, list, list
     private final char[][] characterList;
     // A minor optimization so that we can cache the indices of each character.
-    private final Map<char[], Integer> characterIndicesMap;
+    private final Map<String, Integer> characterIndicesMap;
 
     TickerCharacterList(String characterList) {
         if (characterList.contains(String.valueOf(TickerUtils.EMPTY_CHAR))) {
@@ -51,7 +49,7 @@ class TickerCharacterList {
 
         characterIndicesMap = new HashMap<>(length);
         for (int i = 0; i < length; i++) {
-            characterIndicesMap.put(charsArray[i], i);
+            characterIndicesMap.put(String.valueOf(charsArray[i]), i);
         }
 
         this.characterList = new char[length * 2 + 1][];
@@ -78,7 +76,7 @@ class TickerCharacterList {
 
         switch (direction) {
             case DOWN:
-                if (end == TickerUtils.EMPTY_CHAR) {
+                if (LevenshteinUtils.equalsCharArrays(end, TickerUtils.EMPTY_CHAR)) {
                     endIndex = characterList.length;
                 } else if (endIndex < startIndex) {
                     endIndex += numOriginalCharacters;
@@ -117,7 +115,7 @@ class TickerCharacterList {
         return new CharacterIndices(startIndex, endIndex);
     }
 
-    Set<char[]> getSupportedCharacters() {
+    Set<String> getSupportedCharacters() {
        return characterIndicesMap.keySet();
     }
 
@@ -126,10 +124,11 @@ class TickerCharacterList {
     }
 
     private int getIndexOfChar(char[] c) {
-        if (c == TickerUtils.EMPTY_CHAR) {
+        String s = String.valueOf(c);
+        if (LevenshteinUtils.equalsCharArrays(c,TickerUtils.EMPTY_CHAR)) {
             return 0;
-        } else if (characterIndicesMap.containsKey(c)) {
-            return characterIndicesMap.get(c) + 1;
+        } else if (characterIndicesMap.containsKey(s)) {
+            return characterIndicesMap.get(s) + 1;
         } else {
             return -1;
         }

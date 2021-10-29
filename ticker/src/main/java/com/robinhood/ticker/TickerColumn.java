@@ -132,11 +132,11 @@ class TickerColumn {
         // If we didn't find a list that contains both characters, just perform a default animation
         // going straight from source to target
         if (currentCharacterList == null) {
-            if (currentChar == targetChar) {
-                currentCharacterList = new char[][] {currentChar};
+            if (LevenshteinUtils.equalsCharArrays(currentChar, targetChar)) {
+                currentCharacterList = new char[][]{currentChar};
                 startIndex = endIndex = 0;
             } else {
-                currentCharacterList = new char[][] {currentChar, targetChar};
+                currentCharacterList = new char[][]{currentChar, targetChar};
                 startIndex = 0;
                 endIndex = 1;
             }
@@ -238,7 +238,7 @@ class TickerColumn {
      * @return whether the text was successfully drawn on the canvas
      */
     private boolean drawText(Canvas canvas, Paint textPaint, char[][] characterPlainList,
-            int index, float verticalOffset) {
+                             int index, float verticalOffset) {
         if (index >= 0 && index < characterPlainList.length) {
             char[] chars = characterPlainList[index];
             canvas.drawText(chars, 0, chars.length, 0f, verticalOffset, textPaint);

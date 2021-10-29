@@ -33,7 +33,7 @@ class TickerDrawMetrics {
 
     // These are attributes on the text paint used for measuring and drawing the text on the
     // canvas. These attributes are reset whenever anything on the text paint changes.
-    private final Map<char[], Float> charWidths = new HashMap<>(256);
+    private final Map<String, Float> charWidths = new HashMap<>(256);
     private float charHeight, charBaseline;
 
     private TickerView.ScrollingDirection preferredScrollingDirection = TickerView.ScrollingDirection.ANY;
@@ -51,17 +51,17 @@ class TickerDrawMetrics {
     }
 
     float getCharWidth(char[] character) {
-        if (character == TickerUtils.EMPTY_CHAR) {
+        if (LevenshteinUtils.equalsCharArrays(character, TickerUtils.EMPTY_CHAR)) {
             return 0;
         }
 
         // This method will lazily initialize the char width map.
-        final Float value = charWidths.get(character);
+        final Float value = charWidths.get(String.valueOf(character));
         if (value != null) {
             return value;
         } else {
             final float width = textPaint.measureText(String.valueOf(character));
-            charWidths.put(character, width);
+            charWidths.put(String.valueOf(character), width);
             return width;
         }
     }

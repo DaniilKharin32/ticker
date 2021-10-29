@@ -39,7 +39,7 @@ class TickerColumnManager {
     private final TickerDrawMetrics metrics;
 
     private TickerCharacterList[] characterLists;
-    private Set<char[]> supportedCharacters;
+    private Set<String> supportedCharacters;
 
     TickerColumnManager(TickerDrawMetrics metrics) {
         this.metrics = metrics;

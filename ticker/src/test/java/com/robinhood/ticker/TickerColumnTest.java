@@ -22,9 +22,12 @@ public class TickerColumnTest {
 
     private static TickerCharacterList characterList = new TickerCharacterList("01234");
 
-    @Mock TickerDrawMetrics metrics;
-    @Mock Canvas canvas;
-    @Mock TextPaint paint;
+    @Mock
+    TickerDrawMetrics metrics;
+    @Mock
+    Canvas canvas;
+    @Mock
+    TextPaint paint;
 
     private TickerColumn tickerColumn;
 
@@ -38,7 +41,7 @@ public class TickerColumnTest {
         when(metrics.getPreferredScrollingDirection()).thenReturn(TickerView.ScrollingDirection.ANY);
 
         tickerColumn = new TickerColumn(
-                new TickerCharacterList[] { characterList },
+                new TickerCharacterList[]{characterList},
                 metrics
         );
     }
@@ -76,7 +79,7 @@ public class TickerColumnTest {
     public void test_draw_noAnimation() {
         tickerColumn.setTargetChar(new char[]{'0'});
         setProgress(1f);
-        assertEquals('0', tickerColumn.getTargetChar());
+        assertEquals("0", String.valueOf(tickerColumn.getTargetChar()));
         verifyDraw(1, 0f);
         verifyNoMoreInteractions(canvas);
     }
@@ -285,15 +288,18 @@ public class TickerColumnTest {
     }
 
     private void verifyDraw(char[][] charList, int index, float offset, int times) {
-        char[] testChar;
-        if (index < charList.length - 1) {
-            testChar = charList[index+1];
-        }else if (index >= 1) {
-            testChar = charList[index-1];
-        }else {
-            testChar = charList[index];
-        }
+        char[] chars1 = charList[index];
         verify(canvas, times(times))
-                .drawText(testChar, 0, testChar.length, 0f, offset, paint);
+                .drawText(chars1, 0, chars1.length, 0f, offset, paint);
+        if (index < charList.length - 1) {
+            char[] chars2 = charList[index + 1];
+            verify(canvas, times(times))
+                    .drawText(chars2, 0, chars2.length, 0f, offset - CHAR_HEIGHT, paint);
+        }
+        if (index >= 1) {
+            char[] chars3 = charList[index - 1];
+            verify(canvas, times(times))
+                    .drawText(chars3, 0, chars3.length, 0f, offset + CHAR_HEIGHT, paint);
+        }
     }
 }
