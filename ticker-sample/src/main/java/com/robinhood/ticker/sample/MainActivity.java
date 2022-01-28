@@ -54,6 +54,8 @@ public class MainActivity extends BaseActivity {
         ticker2 = findViewById(R.id.ticker2);
         ticker3 = findViewById(R.id.ticker3);
 
+        ticker3.setCharacterLists("0123456789");
+
         ticker1.setPreferredScrollingDirection(TickerView.ScrollingDirection.DOWN);
         ticker2.setPreferredScrollingDirection(TickerView.ScrollingDirection.UP);
         ticker3.setPreferredScrollingDirection(TickerView.ScrollingDirection.ANY);

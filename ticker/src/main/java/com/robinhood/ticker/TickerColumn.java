@@ -251,16 +251,19 @@ class TickerColumn {
                 int spanEnd = 0;
                 int spanEndNew;
                 ReplacementSpan[] emojiSpans = spannableChars.getSpans(0, spannableChars.length(), ReplacementSpan.class);
-                for (ReplacementSpan span : emojiSpans) {
-                    spanStartNew = spannableChars.getSpanStart(span);
-                    spanEndNew = spannableChars.getSpanEnd(span);
-                    if (spanEnd != spanStartNew) {
-                        canvas.drawText(spannableChars, spanEnd, spanStartNew, 0f, verticalOffset, textPaint);
+                if (emojiSpans.length != 0) {
+                    for (ReplacementSpan span : emojiSpans) {
+                        spanStartNew = spannableChars.getSpanStart(span);
+                        spanEndNew = spannableChars.getSpanEnd(span);
+                        if (spanEnd != spanStartNew) {
+                            canvas.drawText(spannableChars, spanEnd, spanStartNew, 0f, verticalOffset, textPaint);
+                        }
+                        spanStart = spanStartNew;
+                        spanEnd = spanEndNew;
+                        span.draw(canvas, spannableChars, spanStart, spanEnd, 0f, 0, (int) verticalOffset, 0, textPaint);
                     }
-                    spanStart = spanStartNew;
-                    spanEnd = spanEndNew;
-                    int size = span.getSize(textPaint, spannableChars, spanStart, spanEnd, textPaint.getFontMetricsInt());
-                    span.draw(canvas, spannableChars, spanStart, spanEnd, 0f, 0, (int) verticalOffset, 0, textPaint);
+                } else {
+                    canvas.drawText(chars, 0, chars.length(), 0f, verticalOffset, textPaint);
                 }
             } else {
                 canvas.drawText(chars, 0, chars.length(), 0f, verticalOffset, textPaint);
