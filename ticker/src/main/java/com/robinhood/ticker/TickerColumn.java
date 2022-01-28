@@ -18,6 +18,9 @@ package com.robinhood.ticker;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.ReplacementSpan;
 
 /**
  * Represents a column of characters to be drawn on the screen. This class primarily handles
@@ -30,13 +33,13 @@ class TickerColumn {
     private TickerCharacterList[] characterLists;
     private final TickerDrawMetrics metrics;
 
-    private char[] currentChar = TickerUtils.EMPTY_CHAR;
-    private char[] targetChar = TickerUtils.EMPTY_CHAR;
+    private CharSequence currentChar = TickerUtils.EMPTY_CHAR;
+    private CharSequence targetChar = TickerUtils.EMPTY_CHAR;
 
     // The indices characters simply signify what positions are for the current and target
     // characters in the assigned characterList. This tells us how to animate from the current
     // to the target characters.
-    private char[][] currentCharacterList;
+    private CharSequence[] currentCharacterList;
     private int startIndex;
     private int endIndex;
 
@@ -74,7 +77,7 @@ class TickerColumn {
      * change can either be animated or instant depending on the animation progress set by
      * {@link #setAnimationProgress(float)}.
      */
-    void setTargetChar(char[] targetChar) {
+    void setTargetChar(CharSequence targetChar) {
         // Set the current and target characters for the animation
         this.targetChar = targetChar;
         this.sourceWidth = this.currentWidth;
@@ -94,11 +97,11 @@ class TickerColumn {
         currentBottomDelta = 0f;
     }
 
-    char[] getCurrentChar() {
+    CharSequence getCurrentChar() {
         return currentChar;
     }
 
-    char[] getTargetChar() {
+    CharSequence getTargetChar() {
         return targetChar;
     }
 
@@ -133,10 +136,10 @@ class TickerColumn {
         // going straight from source to target
         if (currentCharacterList == null) {
             if (LevenshteinUtils.equalsCharArrays(currentChar, targetChar)) {
-                currentCharacterList = new char[][]{currentChar};
+                currentCharacterList = new CharSequence[]{currentChar};
                 startIndex = endIndex = 0;
             } else {
-                currentCharacterList = new char[][]{currentChar, targetChar};
+                currentCharacterList = new CharSequence[]{currentChar, targetChar};
                 startIndex = 0;
                 endIndex = 1;
             }
@@ -237,11 +240,31 @@ class TickerColumn {
     /**
      * @return whether the text was successfully drawn on the canvas
      */
-    private boolean drawText(Canvas canvas, Paint textPaint, char[][] characterPlainList,
+    private boolean drawText(Canvas canvas, Paint textPaint, CharSequence[] characterPlainList,
                              int index, float verticalOffset) {
         if (index >= 0 && index < characterPlainList.length) {
-            char[] chars = characterPlainList[index];
-            canvas.drawText(chars, 0, chars.length, 0f, verticalOffset, textPaint);
+            CharSequence chars = characterPlainList[index];
+            if (chars instanceof Spannable) {
+                Spannable spannableChars = ((Spannable) chars);
+                int spanStart;
+                int spanStartNew;
+                int spanEnd = 0;
+                int spanEndNew;
+                ReplacementSpan[] emojiSpans = spannableChars.getSpans(0, spannableChars.length(), ReplacementSpan.class);
+                for (ReplacementSpan span : emojiSpans) {
+                    spanStartNew = spannableChars.getSpanStart(span);
+                    spanEndNew = spannableChars.getSpanEnd(span);
+                    if (spanEnd != spanStartNew) {
+                        canvas.drawText(spannableChars, spanEnd, spanStartNew, 0f, verticalOffset, textPaint);
+                    }
+                    spanStart = spanStartNew;
+                    spanEnd = spanEndNew;
+                    int size = span.getSize(textPaint, spannableChars, spanStart, spanEnd, textPaint.getFontMetricsInt());
+                    span.draw(canvas, spannableChars, spanStart, spanEnd, 0f, 0, (int) verticalOffset, 0, textPaint);
+                }
+            } else {
+                canvas.drawText(chars, 0, chars.length(), 0f, verticalOffset, textPaint);
+            }
             return true;
         }
         return false;

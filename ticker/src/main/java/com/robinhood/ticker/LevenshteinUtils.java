@@ -16,6 +16,9 @@
 
 package com.robinhood.ticker;
 
+import android.text.GetChars;
+import android.text.TextUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -44,8 +47,8 @@ public class LevenshteinUtils {
      * {@link #ACTION_DELETE} to represent if we update, insert, or delete a character
      * at the particular index.
      */
-    public static int[] computeColumnActions(char[][] source, char[][] target,
-                                             Set<String> supportedCharacters) {
+    public static int[] computeColumnActions(CharSequence[] source, CharSequence[] target,
+                                             Set<CharSequence> supportedCharacters) {
         int sourceIndex = 0;
         int targetIndex = 0;
 
@@ -109,10 +112,10 @@ public class LevenshteinUtils {
         return result;
     }
 
-    private static int findNextUnsupportedChar(char[][] chars, int startIndex,
-                                               Set<String> supportedCharacters) {
+    private static int findNextUnsupportedChar(CharSequence[] chars, int startIndex,
+                                               Set<CharSequence> supportedCharacters) {
         for (int i = startIndex; i < chars.length; i++) {
-            if (!supportedCharacters.contains(String.valueOf(chars[i]))) {
+            if (!supportedCharacters.contains(chars[i])) {
                 return i;
             }
         }
@@ -141,8 +144,8 @@ public class LevenshteinUtils {
      */
     private static void appendColumnActionsForSegment(
             List<Integer> columnActions,
-            char[][] source,
-            char[][] target,
+            CharSequence[] source,
+            CharSequence[] target,
             int sourceStart,
             int sourceEnd,
             int targetStart,
@@ -226,28 +229,35 @@ public class LevenshteinUtils {
         return Math.min(first, Math.min(second, third));
     }
 
-    public static char[][] toCharArrayOfArray(String rawString) {
-        return toCharArrayOfArray(rawString.toCharArray());
-    }
-
-    public static char[][] toCharArrayOfArray(char[] rawCharsArray) {
-        List<char[]> symbolList = new ArrayList<>();
-        char nextChar;
-        char[] symbol;
-        for (int i = 0; i < rawCharsArray.length; i++) {
-            nextChar = rawCharsArray[i];
-            if (Character.isHighSurrogate(nextChar)) {
-                symbol = new char[]{nextChar, rawCharsArray[i + 1]};
-                i++;
-            } else {
-                symbol = new char[]{nextChar};
-            }
+    public static CharSequence[] toCharArrayOfArray(CharSequence rawCharsArray) {
+        List<CharSequence> symbolList = new ArrayList<>();
+        CharSequence symbol;
+        int length = rawCharsArray.length();
+        for (int i = 0; i < length; i++) {
+            int k = calculateK(rawCharsArray.subSequence(i, rawCharsArray.length()));
+            symbol = rawCharsArray.subSequence(i, i + k);
             symbolList.add(symbol);
+            i += k - 1;
         }
-        return symbolList.toArray(new char[0][]);
+        return symbolList.toArray(new CharSequence[0]);
     }
 
-    public static char[] toPlainCharArray(char[][] charListRaw){
+    private static int calculateK(CharSequence rawCharsArray) {
+        char nextChar = rawCharsArray.charAt(0);
+        int k = 1;
+        if (Character.isHighSurrogate(nextChar)) {
+            k++;
+        }
+        if (k < rawCharsArray.length()) {
+            if (rawCharsArray.charAt(k) == '\u200D') {
+                k++;
+                k += calculateK(rawCharsArray.subSequence(k, rawCharsArray.length()));
+            }
+        }
+        return k;
+    }
+
+    public static char[] toPlainCharArray(char[][] charListRaw) {
         StringBuilder sb = new StringBuilder();
         for (char[] chars : charListRaw) {
             sb.append(chars);
@@ -257,13 +267,142 @@ public class LevenshteinUtils {
         return charList;
     }
 
-    public static boolean equalsCharArrays(char[] first, char[] second) {
-        if (first.length != second.length) return false;
-        for (int i = 0; i < first.length; i++) {
-            if (first[i] != second[i]) {
-                return false;
+    public static boolean equalsCharArrays(CharSequence a, CharSequence b) {
+        if (a == b) return true;
+        int length;
+        if (a != null && b != null && (length = a.length()) == b.length()) {
+            if (a instanceof String && b instanceof String) {
+                return a.equals(b);
+            } else {
+                for (int i = 0; i < length; i++) {
+                    if (a.charAt(i) != b.charAt(i)) return false;
+                }
+                return true;
             }
         }
-        return true;
+        return false;
+    }
+
+    public static int indexOf(CharSequence s, CharSequence needle) {
+        return indexOf(s, needle, 0, s.length());
+    }
+
+    public static int indexOf(CharSequence s, CharSequence needle, int start) {
+        return indexOf(s, needle, start, s.length());
+    }
+
+    public static int indexOf(CharSequence s, CharSequence needle,
+                              int start, int end) {
+        int nlen = needle.length();
+        if (nlen == 0)
+            return start;
+
+        char c = needle.charAt(0);
+
+        for (; ; ) {
+            start = indexOf(s, c, start);
+            if (start > end - nlen) {
+                break;
+            }
+
+            if (start < 0) {
+                return -1;
+            }
+
+            if (regionMatches(s, start, needle, 0, nlen)) {
+                return start;
+            }
+
+            start++;
+        }
+        return -1;
+    }
+
+    public static boolean regionMatches(CharSequence one, int toffset,
+                                        CharSequence two, int ooffset,
+                                        int len) {
+        int tempLen = 2 * len;
+        if (tempLen < len) {
+            // Integer overflow; len is unreasonably large
+            throw new IndexOutOfBoundsException();
+        }
+        char[] temp = new char[tempLen];
+
+        getChars(one, toffset, toffset + len, temp, 0);
+        getChars(two, ooffset, ooffset + len, temp, len);
+
+        boolean match = true;
+        for (int i = 0; i < len; i++) {
+            if (temp[i] != temp[i + len]) {
+                match = false;
+                break;
+            }
+        }
+        return match;
+    }
+
+    public static void getChars(CharSequence s, int start, int end,
+                                char[] dest, int destoff) {
+        Class<? extends CharSequence> c = s.getClass();
+
+        if (c == String.class)
+            ((String) s).getChars(start, end, dest, destoff);
+        else if (c == StringBuffer.class)
+            ((StringBuffer) s).getChars(start, end, dest, destoff);
+        else if (c == StringBuilder.class)
+            ((StringBuilder) s).getChars(start, end, dest, destoff);
+        else if (s instanceof GetChars)
+            ((GetChars) s).getChars(start, end, dest, destoff);
+        else {
+            for (int i = start; i < end; i++)
+                dest[destoff++] = s.charAt(i);
+        }
+    }
+
+    public static int indexOf(CharSequence s, char ch) {
+        return indexOf(s, ch, 0);
+    }
+
+    public static int indexOf(CharSequence s, char ch, int start) {
+        Class<? extends CharSequence> c = s.getClass();
+
+        if (c == String.class)
+            return ((String) s).indexOf(ch, start);
+
+        return indexOf(s, ch, start, s.length());
+    }
+
+    public static int indexOf(CharSequence s, char ch, int start, int end) {
+        Class<? extends CharSequence> c = s.getClass();
+
+        if (s instanceof GetChars || c == StringBuffer.class ||
+                c == StringBuilder.class || c == String.class) {
+            final int INDEX_INCREMENT = 500;
+            char[] temp = new char[INDEX_INCREMENT];
+
+            while (start < end) {
+                int segend = start + INDEX_INCREMENT;
+                if (segend > end)
+                    segend = end;
+
+                getChars(s, start, segend, temp, 0);
+
+                int count = segend - start;
+                for (int i = 0; i < count; i++) {
+                    if (temp[i] == ch) {
+                        return i + start;
+                    }
+                }
+
+                start = segend;
+            }
+            return -1;
+        }
+
+        for (int i = start; i < end; i++)
+            if (s.charAt(i) == ch)
+                return i;
+
+        return -1;
     }
 }

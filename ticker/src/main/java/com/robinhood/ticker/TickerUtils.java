@@ -23,7 +23,7 @@ package com.robinhood.ticker;
  * @author Jin Cao, Robinhood
  */
 public class TickerUtils {
-    static final char[] EMPTY_CHAR = new char[]{(char) 0};
+    static final CharSequence EMPTY_CHAR = String.valueOf((char) 0);
 
     public static String provideNumberList() {
         return "0123456789";

@@ -82,7 +82,7 @@ public class TickerView extends View {
     // Minor optimizations for re-positioning the canvas for the composer.
     private final Rect viewBounds = new Rect();
 
-    private String text;
+    private CharSequence text;
 
     private int lastMeasuredDesiredWidth, lastMeasuredDesiredHeight;
 
@@ -96,7 +96,7 @@ public class TickerView extends View {
     private Interpolator animationInterpolator;
     private boolean animateMeasurementChange;
     // pending text set from XML because we didn't have a character list initially
-    private String pendingTextToSet;
+    private CharSequence pendingTextToSet;
 
     public TickerView(Context context) {
         super(context);
@@ -326,18 +326,18 @@ public class TickerView extends View {
      *
      * @param text the text to display.
      */
-    public void setText(String text) {
+    public void setText(CharSequence text) {
         setText(text, !TextUtils.isEmpty(this.text));
     }
 
     /**
-     * Similar to {@link #setText(String)} but provides the optional argument of whether to
+     * Similar to {@link #setText(CharSequence)} but provides the optional argument of whether to
      * animate to the provided text or not.
      *
      * @param text the text to display.
      * @param animate whether to animate to text.
      */
-    public void setText(String text, boolean animate) {
+    public void setText(CharSequence text, boolean animate) {
         if (TextUtils.equals(text, this.text)) {
             return;
         }
@@ -370,7 +370,7 @@ public class TickerView extends View {
      *
      * @return last set text on this view.
      */
-    public String getText() {
+    public CharSequence getText() {
         return text;
     }
 
@@ -705,11 +705,9 @@ public class TickerView extends View {
         canvas.clipRect(0f, 0f, currentWidth, currentHeight);
     }
 
-    private void setTextInternal(String text) {
+    private void setTextInternal(CharSequence text) {
         this.text = text;
-        final char[] targetText = text == null ? new char[0] : text.toCharArray();
-
-        columnManager.setText(targetText);
+        columnManager.setText(text);
         setContentDescription(text);
     }
 
@@ -726,12 +724,12 @@ public class TickerView extends View {
     }
 
     private static final class AnimationHolder {
-        public final String text;
+        public final CharSequence text;
         public final long animationDelayInMillis;
         public final long animationDurationInMillis;
         public final Interpolator animationInterpolator;
 
-        private AnimationHolder(String text,
+        private AnimationHolder(CharSequence text,
                                 long animationDelayInMillis,
                                 long animationDurationInMillis,
                                 Interpolator animationInterpolator) {

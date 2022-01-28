@@ -4,18 +4,50 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
+import androidx.core.provider.FontRequest;
+import androidx.emoji.text.EmojiCompat;
+import androidx.emoji.text.FontRequestEmojiCompatConfig;
+
+import com.robinhood.ticker.LevenshteinUtils;
 import com.robinhood.ticker.TickerView;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class MainActivity extends BaseActivity {
-    private final String alphabetlist = "abcdefghijklmnopqrstuvwxyz\uD83D\uDD25";
+    private final CharSequence[] alphabetlist = LevenshteinUtils.toCharArrayOfArray("abcdefghijklmnopqrstuvwxyz\uD83D\uDD25\uD83E\uDEB3\uD83D\uDC68\u200D\uD83D\uDC68\u200D\uD83D\uDC67\u200D\uD83D\uDC67");
 
     private TickerView ticker1, ticker2, ticker3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        List<Integer> exceptionInts = new ArrayList<>(11);
+        exceptionInts.add((int) '1');
+        exceptionInts.add((int) '2');
+        exceptionInts.add((int) '3');
+        exceptionInts.add((int) '4');
+        exceptionInts.add((int) '5');
+        exceptionInts.add((int) '6');
+        exceptionInts.add((int) '7');
+        exceptionInts.add((int) '8');
+        exceptionInts.add((int) '9');
+        exceptionInts.add((int) '0');
+        exceptionInts.add((int) '#');
+        FontRequest fontRequest = new FontRequest(
+                "com.google.android.gms.fonts",
+                "com.google.android.gms",
+                "Noto Color Emoji Compat",
+                R.array.com_google_android_gms_fonts_certs);
+        EmojiCompat.Config config = new FontRequestEmojiCompatConfig(this, fontRequest)
+                .setReplaceAll(true)
+                .setUseEmojiAsDefaultStyle(true, exceptionInts);
+        EmojiCompat.init(config);
         setContentView(R.layout.activity_main);
 
         ticker1 = findViewById(R.id.ticker1);
@@ -51,23 +83,15 @@ public class MainActivity extends BaseActivity {
         ticker3.setText(generateChars(RANDOM, alphabetlist, digits));
     }
 
-    private String generateChars(Random random, String list, int numDigits) {
+    private CharSequence generateChars(Random random, CharSequence[] list, int numDigits) {
         StringBuilder sb = new StringBuilder();
-        char nextChar;
-        char[] symbol;
+        CharSequence symbol;
         int pos;
         for (int i = 0; i < numDigits; i++) {
-            pos = random.nextInt(list.length());
-            nextChar = list.charAt(pos);
-            if (Character.isHighSurrogate(nextChar)) {
-                symbol = new char[]{nextChar, list.charAt(pos + 1)};
-            } else if (Character.isLowSurrogate(nextChar)) {
-                symbol = new char[]{list.charAt(pos - 1), nextChar};
-            } else {
-                symbol = new char[]{nextChar};
-            }
+            pos = random.nextInt(list.length);
+            symbol = list[pos];
             sb.append(symbol);
         }
-        return sb.toString();
+        return EmojiCompat.get().process(sb.toString());
     }
 }

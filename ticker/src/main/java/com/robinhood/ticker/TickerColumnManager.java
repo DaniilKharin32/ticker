@@ -39,7 +39,7 @@ class TickerColumnManager {
     private final TickerDrawMetrics metrics;
 
     private TickerCharacterList[] characterLists;
-    private Set<String> supportedCharacters;
+    private Set<CharSequence> supportedCharacters;
 
     TickerColumnManager(TickerDrawMetrics metrics) {
         this.metrics = metrics;
@@ -72,11 +72,11 @@ class TickerColumnManager {
     /**
      * Tell the column manager the new target text that it should display.
      */
-    void setText(char[] rawText) {
+    void setText(CharSequence rawText) {
         if (characterLists == null) {
             throw new IllegalStateException("Need to call #setCharacterLists first.");
         }
-        char[][] text = LevenshteinUtils.toCharArrayOfArray(rawText);
+        CharSequence[] text = LevenshteinUtils.toCharArrayOfArray(rawText);
         // First remove any zero-width columns
         for (int i = 0; i < tickerColumns.size(); ) {
             final TickerColumn tickerColumn = tickerColumns.get(i);
@@ -144,9 +144,9 @@ class TickerColumnManager {
         return width;
     }
 
-    char[][] getCurrentText() {
+    CharSequence[] getCurrentText() {
         final int size = tickerColumns.size();
-        final char[][] currentText = new char[size][];
+        final CharSequence[] currentText = new CharSequence[size];
         for (int i = 0; i < size; i++) {
             currentText[i] = tickerColumns.get(i).getCurrentChar();
         }

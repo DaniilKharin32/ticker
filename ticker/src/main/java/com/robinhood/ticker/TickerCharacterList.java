@@ -16,6 +16,8 @@
 
 package com.robinhood.ticker;
 
+import android.text.TextUtils;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -34,16 +36,16 @@ import java.util.Set;
 class TickerCharacterList {
     private final int numOriginalCharacters;
     // The saved character list will always be of the format: EMPTY, list, list
-    private final char[][] characterList;
+    private final CharSequence[] characterList;
     // A minor optimization so that we can cache the indices of each character.
     private final Map<String, Integer> characterIndicesMap;
 
-    TickerCharacterList(String characterList) {
-        if (characterList.contains(String.valueOf(TickerUtils.EMPTY_CHAR))) {
+    TickerCharacterList(CharSequence characterList) {
+        if (LevenshteinUtils.indexOf(characterList,TickerUtils.EMPTY_CHAR)!=-1) {
             throw new IllegalArgumentException(
                     "You cannot include TickerUtils.EMPTY_CHAR in the character list.");
         }
-        final char[][] charsArray = LevenshteinUtils.toCharArrayOfArray(characterList);
+        final CharSequence[] charsArray = LevenshteinUtils.toCharArrayOfArray(characterList);
         final int length = charsArray.length;
         this.numOriginalCharacters = length;
 
@@ -52,7 +54,7 @@ class TickerCharacterList {
             characterIndicesMap.put(String.valueOf(charsArray[i]), i);
         }
 
-        this.characterList = new char[length * 2 + 1][];
+        this.characterList = new CharSequence[length * 2 + 1];
         this.characterList[0] = TickerUtils.EMPTY_CHAR;
         for (int i = 0; i < length; i++) {
             this.characterList[1 + i] = charsArray[i];
@@ -66,7 +68,7 @@ class TickerCharacterList {
      * @param direction the preferred {@Link TickerView#ScrollingDirection}
      * @return a valid pair of start and end indices, or null if the inputs are not supported.
      */
-    CharacterIndices getCharacterIndices(char[] start, char[] end, TickerView.ScrollingDirection direction) {
+    CharacterIndices getCharacterIndices(CharSequence start, CharSequence end, TickerView.ScrollingDirection direction) {
         int startIndex = getIndexOfChar(start);
         int endIndex = getIndexOfChar(end);
 
@@ -119,11 +121,11 @@ class TickerCharacterList {
        return characterIndicesMap.keySet();
     }
 
-    char[][] getCharacterList() {
+    CharSequence[] getCharacterList() {
         return characterList;
     }
 
-    private int getIndexOfChar(char[] c) {
+    private int getIndexOfChar(CharSequence c) {
         String s = String.valueOf(c);
         if (LevenshteinUtils.equalsCharArrays(c,TickerUtils.EMPTY_CHAR)) {
             return 0;

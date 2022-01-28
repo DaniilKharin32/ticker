@@ -38,29 +38,29 @@ public class TickerDrawMetricsTest {
 
     @Test
     public void test_charWidth() {
-        when(paint.measureText("1")).thenReturn(1f);
-        when(paint.measureText("2")).thenReturn(2f);
-        when(paint.measureText("3")).thenReturn(3f);
+        when(paint.measureText((CharSequence) "1",0,1)).thenReturn(1f);
+        when(paint.measureText((CharSequence) "2",0,1)).thenReturn(2f);
+        when(paint.measureText((CharSequence) "3",0,1)).thenReturn(3f);
 
-        assertEquals(1f, metrics.getCharWidth(new char[]{'1'}), 0f);
-        assertEquals(2f, metrics.getCharWidth(new char[]{'2'}), 0f);
-        assertEquals(3f, metrics.getCharWidth(new char[]{'3'}), 0f);
+        assertEquals(1f, metrics.getCharWidth("1"), 0f);
+        assertEquals(2f, metrics.getCharWidth("2"), 0f);
+        assertEquals(3f, metrics.getCharWidth("3"), 0f);
 
         // Subsequent calls should be cached
-        assertEquals(1f, metrics.getCharWidth(new char[]{'1'}), 0f);
-        assertEquals(2f, metrics.getCharWidth(new char[]{'2'}), 0f);
-        assertEquals(3f, metrics.getCharWidth(new char[]{'3'}), 0f);
+        assertEquals(1f, metrics.getCharWidth("1"), 0f);
+        assertEquals(2f, metrics.getCharWidth("2"), 0f);
+        assertEquals(3f, metrics.getCharWidth("3"), 0f);
 
         metrics.invalidate();
 
         // These calls should re-measure based on the paint
-        assertEquals(1f, metrics.getCharWidth(new char[]{'1'}), 0f);
-        assertEquals(2f, metrics.getCharWidth(new char[]{'2'}), 0f);
-        assertEquals(3f, metrics.getCharWidth(new char[]{'3'}), 0f);
+        assertEquals(1f, metrics.getCharWidth("1"), 0f);
+        assertEquals(2f, metrics.getCharWidth("2"), 0f);
+        assertEquals(3f, metrics.getCharWidth("3"), 0f);
 
-        verify(paint, times(2)).measureText("1");
-        verify(paint, times(2)).measureText("2");
-        verify(paint, times(2)).measureText("3");
+        verify(paint, times(2)).measureText((CharSequence) "1",0,1);
+        verify(paint, times(2)).measureText((CharSequence) "2",0,1);
+        verify(paint, times(2)).measureText((CharSequence) "3",0,1);
         verify(paint, times(2)).getFontMetrics();
         verifyNoMoreInteractions(paint);
     }

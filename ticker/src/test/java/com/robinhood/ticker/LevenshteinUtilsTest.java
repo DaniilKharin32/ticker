@@ -2,14 +2,13 @@ package com.robinhood.ticker;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import java.util.HashSet;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 
 public class LevenshteinUtilsTest {
-    private Set<String> numbers;
+    private Set<CharSequence> numbers;
 
     @Before
     public void setup() {
@@ -79,7 +78,7 @@ public class LevenshteinUtilsTest {
 
     private void runTest(String source, String target, String actions) {
         final int[] result = LevenshteinUtils.computeColumnActions(
-                LevenshteinUtils.toCharArrayOfArray(source.toCharArray()), LevenshteinUtils.toCharArrayOfArray(target.toCharArray()), numbers);
+                LevenshteinUtils.toCharArrayOfArray(source), LevenshteinUtils.toCharArrayOfArray(target), numbers);
         assertEquals(actions, convertArrToString(result));
     }
 

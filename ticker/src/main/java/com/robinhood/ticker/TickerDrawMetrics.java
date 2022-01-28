@@ -17,6 +17,8 @@
 package com.robinhood.ticker;
 
 import android.graphics.Paint;
+import android.text.Spannable;
+import android.text.style.ReplacementSpan;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,7 +35,7 @@ class TickerDrawMetrics {
 
     // These are attributes on the text paint used for measuring and drawing the text on the
     // canvas. These attributes are reset whenever anything on the text paint changes.
-    private final Map<String, Float> charWidths = new HashMap<>(256);
+    private final Map<CharSequence, Float> charWidths = new HashMap<>(256);
     private float charHeight, charBaseline;
 
     private TickerView.ScrollingDirection preferredScrollingDirection = TickerView.ScrollingDirection.ANY;
@@ -50,18 +52,46 @@ class TickerDrawMetrics {
         charBaseline = -fm.top;
     }
 
-    float getCharWidth(char[] character) {
+    float getCharWidth(CharSequence character) {
         if (LevenshteinUtils.equalsCharArrays(character, TickerUtils.EMPTY_CHAR)) {
             return 0;
         }
 
         // This method will lazily initialize the char width map.
-        final Float value = charWidths.get(String.valueOf(character));
+        final Float value = charWidths.get(character);
         if (value != null) {
             return value;
         } else {
-            final float width = textPaint.measureText(String.valueOf(character));
-            charWidths.put(String.valueOf(character), width);
+            float width = 0;
+            if (character instanceof Spannable) {
+                Spannable spannableChars = ((Spannable) character);
+                int spanStart = 0;
+                int spanStartNew;
+                int spanEnd = 0;
+                int spanEndNew;
+                ReplacementSpan[] emojiSpans = spannableChars.getSpans(0, spannableChars.length(), ReplacementSpan.class);
+                if (emojiSpans.length != 0) {
+                    for (ReplacementSpan span : emojiSpans) {
+                        spanStartNew = spannableChars.getSpanStart(span);
+                        spanEndNew = spannableChars.getSpanEnd(span);
+                        if (spanEnd != spanStartNew) {
+                            width += textPaint.measureText(character, spanEnd, spanStartNew);
+                        }
+                        if (spanStart != spanStartNew) {
+                            width += textPaint.measureText(character, spanStart, spanStartNew);
+                        }
+                        spanStart = spanStartNew;
+                        spanEnd = spanEndNew;
+                        width += span.getSize(textPaint, spannableChars, spanStart, spanEnd, textPaint.getFontMetricsInt());
+                    }
+                }else {
+                    width = textPaint.measureText(character, 0, character.length());
+                }
+                charWidths.put(character, width);
+            } else {
+                width = textPaint.measureText(character, 0, character.length());
+                charWidths.put(character, width);
+            }
             return width;
         }
     }
