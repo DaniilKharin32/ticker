@@ -242,6 +242,8 @@ public class LevenshteinUtils {
         return symbolList.toArray(new CharSequence[0]);
     }
 
+    static String skinTones = "\uDFFB\uDFFC\uDFFD\uDFFE\uDFFF";
+
     private static int calculateK(CharSequence rawCharsArray) {
         char nextChar = rawCharsArray.charAt(0);
         int k = 1;
@@ -249,7 +251,7 @@ public class LevenshteinUtils {
             k++;
         }
         if (k < rawCharsArray.length()) {
-            if (rawCharsArray.charAt(k) == '\u200D') {
+            if (rawCharsArray.charAt(k) == '\u200D' || (rawCharsArray.charAt(k) == '\uD83C') && skinTones.indexOf(rawCharsArray.charAt(k + 1)) != -1) {
                 k++;
                 k += calculateK(rawCharsArray.subSequence(k, rawCharsArray.length()));
             }

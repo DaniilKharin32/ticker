@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class MainActivity extends BaseActivity {
-    private final CharSequence[] alphabetlist = LevenshteinUtils.toCharArrayOfArray("abcdefghijklmnopqrstuvwxyz\uD83D\uDD25\uD83E\uDEB3\uD83D\uDC68\u200D\uD83D\uDC68\u200D\uD83D\uDC67\u200D\uD83D\uDC67");
+    private final CharSequence[] alphabetlist = LevenshteinUtils.toCharArrayOfArray("abcdefghikmlnopqrstxyz\uD83D\uDC76\uD83C\uDFFF\uD83C\uDF85\uD83C\uDFFF\uD83D\uDC77\uD83C\uDFFE\u200D♀");
 
     private TickerView ticker1, ticker2, ticker3;
 
