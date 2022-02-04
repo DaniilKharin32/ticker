@@ -245,15 +245,18 @@ public class LevenshteinUtils {
     static String skinTones = "\uDFFB\uDFFC\uDFFD\uDFFE\uDFFF";
 
     private static int calculateK(CharSequence rawCharsArray) {
-        char nextChar = rawCharsArray.charAt(0);
         int k = 1;
-        if (Character.isHighSurrogate(nextChar)) {
+        if (Character.isHighSurrogate(rawCharsArray.charAt(0))) {
             k++;
         }
         if (k < rawCharsArray.length()) {
-            if (rawCharsArray.charAt(k) == '\u200D' || (rawCharsArray.charAt(k) == '\uD83C') && skinTones.indexOf(rawCharsArray.charAt(k + 1)) != -1) {
+            char kChar = rawCharsArray.charAt(k);
+            Character kNextChar = (k + 1 >= rawCharsArray.length()) ? null : rawCharsArray.charAt(k + 1);
+            if (kChar == '\u200D' || (kChar == '\uD83C' && kNextChar != null && skinTones.indexOf(kNextChar) != -1)) {
                 k++;
                 k += calculateK(rawCharsArray.subSequence(k, rawCharsArray.length()));
+            } else if (kChar == '️') {
+                k++;
             }
         }
         return k;
