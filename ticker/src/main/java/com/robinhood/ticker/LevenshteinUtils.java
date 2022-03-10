@@ -234,7 +234,7 @@ public class LevenshteinUtils {
         CharSequence symbol;
         int length = rawCharsArray.length();
         for (int i = 0; i < length; i++) {
-            int k = calculateK(rawCharsArray.subSequence(i, rawCharsArray.length()));
+            int k = calculateK(rawCharsArray.subSequence(i, rawCharsArray.length()), 0);
             symbol = rawCharsArray.subSequence(i, i + k);
             symbolList.add(symbol);
             i += k - 1;
@@ -244,7 +244,7 @@ public class LevenshteinUtils {
 
     static String skinTones = "\uDFFB\uDFFC\uDFFD\uDFFE\uDFFF";
 
-    private static int calculateK(CharSequence rawCharsArray) {
+    private static int calculateK(CharSequence rawCharsArray, int absK) {
         int k = 1;
         if (Character.isHighSurrogate(rawCharsArray.charAt(0))) {
             k++;
@@ -254,9 +254,13 @@ public class LevenshteinUtils {
             Character kNextChar = (k + 1 >= rawCharsArray.length()) ? null : rawCharsArray.charAt(k + 1);
             if (kChar == '\u200D' || (kChar == '\uD83C' && kNextChar != null && skinTones.indexOf(kNextChar) != -1)) {
                 k++;
-                k += calculateK(rawCharsArray.subSequence(k, rawCharsArray.length()));
+                k += calculateK(rawCharsArray.subSequence(k, rawCharsArray.length()), absK + k);
+            } else if (kChar == '️' && kNextChar != null && kNextChar == '\u200D') {
+                k += calculateK(rawCharsArray.subSequence(k, rawCharsArray.length()), absK + k);
             } else if (kChar == '️') {
                 k++;
+            } else if (kChar == '\uD83C' && k > 1 && absK < 4 && kNextChar != null && kNextChar >= '\uDDE6' && kNextChar <= '\uDDFF') {
+                k += 2;
             }
         }
         return k;
