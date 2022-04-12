@@ -277,19 +277,31 @@ public class LevenshteinUtils {
     }
 
     public static boolean equalsCharArrays(CharSequence a, CharSequence b) {
-        if (a == b) return true;
-        int length;
-        if (a != null && b != null && (length = a.length()) == b.length()) {
-            if (a instanceof String && b instanceof String) {
-                return a.equals(b);
-            } else {
-                for (int i = 0; i < length; i++) {
-                    if (a.charAt(i) != b.charAt(i)) return false;
+        if (a == b) {
+            return true;
+        } else {
+            int length;
+            if (a != null && b != null && a.length() == b.length()) {
+                if (a instanceof String && b instanceof String) {
+                    return a.equals(b);
+                } else {
+                    char[] aChars = a.toString().toCharArray();
+                    char[] bChars = b.toString().toCharArray();
+                    if ((length = aChars.length) == bChars.length) {
+                        for (int i = 0; i < length; ++i) {
+                            if (aChars[i] != bChars[i]) {
+                                return false;
+                            }
+                        }
+                    }else {
+                        return false;
+                    }
+                    return true;
                 }
-                return true;
+            } else {
+                return false;
             }
         }
-        return false;
     }
 
     public static int indexOf(CharSequence s, CharSequence needle) {
