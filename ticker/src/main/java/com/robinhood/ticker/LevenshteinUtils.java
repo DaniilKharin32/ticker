@@ -245,6 +245,7 @@ public class LevenshteinUtils {
     static String skinTones = "\uDFFB\uDFFC\uDFFD\uDFFE\uDFFF";
 
     private static int calculateK(CharSequence rawCharsArray, int absK) {
+        if (rawCharsArray == null || rawCharsArray.length() == 0) return -1;
         int k = 1;
         if (Character.isHighSurrogate(rawCharsArray.charAt(0))) {
             k++;

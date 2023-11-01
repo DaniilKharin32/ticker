@@ -34,13 +34,37 @@ public class LevenshteinUtilsTest {
     }
 
     @Test
+    public void test_insert4() {
+        runTest("", "1", "1");
+    }
+
+    @Test
     public void test_delete() {
         runTest("11211", "1111", "00200");
     }
 
     @Test
+    public void test_delete1() {
+        runTest("1", "", "2");
+    }
+
+    @Test
     public void test_equal() {
         runTest("1234", "1234", "0000");
+    }
+    @Test
+    public void test_special1() {
+        runTest("1", "1\u200D", "01");
+    }
+
+    @Test
+    public void test_special2() {
+        runTest("1\u200D", "1", "02");
+    }
+
+    @Test
+    public void test_special3() {
+        runTest("1\u200D", "1\u200D", "00");
     }
 
     @Test
